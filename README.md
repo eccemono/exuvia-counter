@@ -1,303 +1,121 @@
-# 🐛 Exuvia Counter - Complete System
+# OKSIR Exuvia Counter
 
-A unified Python application for exuvia (insect shell) counting using Raspberry Pi, HQ Camera, and YOLO object detection. Includes live preview, training data management, and comprehensive data analytics with Excel export.
+Automating the counting of codling moth exuvia for British Columbia's sterile insect release program. A Raspberry Pi imaging system, a YOLO computer vision model, and a Streamlit web app that turns a slow manual task into a minute of camera work.
 
-## Project Structure
+## The problem
 
-```
-exuvia_app/
-├── app.py                  # Main Streamlit application (THE PROGRAM)
-├── camera.py               # Picamera2 wrapper for Pi HQ camera
-├── detector.py             # YOLO v8 detection engine
-├── tiler.py                # Image tiling for training data
-├── data_manager.py         # Excel logging & statistics
-├── requirements.txt        # Python dependencies
-├── data/                   # Auto-created directories
-│   ├── captures/           # Full resolution images
-│   ├── tiles/              # Training tiles by tray
-│   ├── detections/         # Annotated detection results
-│   ├── exports/            # Exported Excel files
-│   └── exuvia_log.xlsx     # Main data log
-└── README.md
-```
+The Okanagan Kootenay Sterile Insect Release program (OKSIR) breeds and releases millions of sterile codling moths to protect Okanagan orchards without relying on pesticides. To verify production, staff count *exuvia*, the shed exoskeletons larvae leave behind when they mature into adult moths.
+
+Counting is done by hand. Staff divide each tray into quarters, count one quarter, and multiply by four to estimate the total. It is slow, tedious, and prone to error, and it can tie up a full employee for a summer.
+
+This project replaces the manual method with a controlled imaging box and a computer vision model that estimates a tray count in minutes.
+
+## What it is
+
+- An illuminated imaging enclosure built around a Raspberry Pi 5 and a 12.3 MP HQ camera
+- A YOLO detection model trained on over 15,000 labeled exuvia
+- A Streamlit web app for capture, counting, and data export
+- Tiled inference with overlap and duplicate suppression for small object recall
+
+## Key numbers
+
+| Metric | Value |
+| ------ | ----- |
+| Detection accuracy (mAP@50) | 92% |
+| Precision and recall | above 90% |
+| Labeled training samples | 15,000+ |
+| Target | outperform the manual quarter count on both speed and accuracy |
+
+## Hardware
+
+- Raspberry Pi 5, headless on boot via a systemd service
+- Raspberry Pi HQ Camera (12.3 MP Sony IMX477)
+- 12 MP factory automation lens on a C mount
+- White and UV LED array inside an aluminum and vinyl coated enclosure
+- 3D printed overhead camera mount with adjustable focus, iris, and zoom
+
+## Software
+
+- Python and Streamlit for the web interface
+- Ultralytics YOLO for detection
+- OpenCV, NumPy, pandas, SciPy, and Matplotlib for processing and statistics
+- Full resolution stills via `rpicam-jpeg` and a live preview via `rpicam-still`
 
 ## Features
 
-### 📷 Live Capture Page
-- **Real-time camera preview** from Raspberry Pi HQ Camera
-- **1x, 2x, 3x zoom levels** (digital zoom)
-- **YOLO detection** with adjustable confidence threshold
-- **Model selection**: Nano (fast), Small (balanced), Medium (accurate)
-- **Automatic data logging** to Excel
-- **Keyboard shortcuts** for quick capture (spacebar support in future versions)
+- Live camera preview for manual focus
+- Full resolution image capture
+- Exuvia counter with adjustable confidence and IoU thresholds
+- Threshold sweep to tune detection against a real tray
+- Batch tracking with statistics
+- One click export to Excel
 
-### 🏋️ Training Data Page
-- **Image tiling**: Convert full images into 256px tiles with overlap
-- **Tile organization**: Automatically organized by tray ID
-- **Tile browser**: View all tiles in your library
-- **Streamlined for labeling**: Export tiles ready for Roboflow, Label Studio, or similar
+## Project structure
 
-### 📊 Data Analysis Page
-- **Real-time statistics**: Total captures, counts, averages, std dev
-- **Tray breakdown**: Per-tray summaries
-- **Visualizations**: Time series and distribution charts
-- **Outlier detection**: Automatically find anomalies (Z-score analysis)
-- **Excel export**: Download data in multiple formats
-- **Statistical analysis**: Ready for further statistical testing
+```
+exuvia-counter/
+├── app.py             # Main Streamlit application
+├── camera.py          # Camera control (Pi HQ camera and USB fallback)
+├── detector.py        # YOLO detection and tiled inference
+├── tiler.py           # Image tiling for training data
+├── data_manager.py    # Excel logging and statistics
+├── config.py          # Default settings
+├── requirements.txt   # Core dependencies
+├── requirements-ml.txt# Optional YOLO dependencies
+├── run.sh             # Setup and launch script
+├── examples.py        # Programmatic usage examples
+└── .streamlit/        # Streamlit theme configuration
+```
 
-## Installation & Setup
+## Getting started
 
 ### Prerequisites
-- Raspberry Pi 4/5 (or desktop for testing)
-- Picamera2 library (Pi only)
-- Python 3.8+
 
-Recommended runtime:
-- Python 3.11/3.12 for best YOLO compatibility on Raspberry Pi.
-- Python 3.13 works for capture/logging/analytics, but YOLO wheels may be unavailable.
+- Raspberry Pi 4 or 5 (or a desktop for testing)
+- Python 3.11 or 3.12 recommended for YOLO
+- A Raspberry Pi HQ Camera or a USB webcam
 
-### 1. Install on Raspberry Pi
+### Install and run
 
 ```bash
-# SSH into your Pi, then:
-cd ~/Desktop/Exuvia/Exuvia-Counting-main\ \(1\)/Exuvia-Counting-main/exuvia_app
-
 # Install dependencies
 pip install -r requirements.txt
 
-# Optional YOLO dependencies
+# Optional YOLO support
 pip install -r requirements-ml.txt
 
 # Run the app
-streamlit run app.py
+streamlit run app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
-The app will start a local server. Note the URL (usually: `http://localhost:8501`)
-
-### 2. Access from Windows PC
-
-If Pi is on network at Osoyoos facility:
-
-1. Find Pi's IP address:
-   ```bash
-   # On Pi terminal
-   hostname -I
-   ```
-   
-   This gives you something like: `192.168.1.100`
-
-2. On Windows PC, open browser and go to:
-   ```
-   http://192.168.1.100:8501
-   ```
-
-3. That's it! No installation needed on Windows. Just a browser.
-
-### 2.1 Access from Anywhere with Tailscale
-
-If both devices are in your tailnet, use one of these URLs:
-
-- `http://<tailscale-ip>:8501`
-- `http://<pi-tailnet-name>:8501`
-
-The app now shows these links in the sidebar under **Links**, and `run.sh` prints them on startup.
-
-If you want a public HTTPS link (without installing Tailscale on the viewer device), you can use Funnel:
+Or use the launcher, which creates a virtual environment and installs dependencies for you:
 
 ```bash
-./enable_funnel.sh
-tailscale funnel status
+./run.sh
 ```
 
-That returns an HTTPS URL you can open from anywhere.
+Then open `http://localhost:8501`. The app is reachable from any device on the same network, and optionally over Tailscale.
 
-### 3. Testing on Desktop (Without Pi Camera)
+## Models
 
-The system gracefully falls back to USB webcam if Picamera2 is unavailable:
+The trained YOLO weights are not included in this repository. Place `.pt` files in a `models/` directory next to the app and select them from the counter page. The model loader picks up any `.pt` file in that folder.
 
-```bash
-# Will work with any USB webcam
-streamlit run app.py
-```
+## Usage
 
-## How to Use
+1. Open Video Capture to focus the lens against a real tray.
+2. Capture tray photos in Image Capture or Exuvia Counter.
+3. Run the counter to tile, detect, merge, and count.
+4. Review the bounding boxes and tune confidence or IoU if needed.
+5. Save results and review batch statistics in Data & Tables.
 
-### Workflow 1: Capture & Detect
+## How detection works
 
-1. **Go to "Live Capture" page**
-2. **Select zoom level** (1x for full view, 2x/3x for focusing)
-3. **Enter tray ID** (e.g., "tray_001")
-4. **Add optional notes**
-5. **Click "Capture Image"** - frame is saved + detection runs
-6. **Results appear instantly** - count, confidence, annotated image
-7. **Data auto-logs to Excel**
+The model runs tiled inference over the full resolution image with overlap between tiles. Detections are remapped to full image coordinates, then passed through non-maximum suppression and center based deduplication to remove duplicate boxes from adjacent tiles. Edge hugging and very small boxes are filtered before the final count.
 
-### Workflow 2: Prepare Training Data
+## Notes and disclaimer
 
-1. **Go to "Training Data" page**
-2. **Upload a high-res image** from your tray
-3. **Set tray ID** + tile size (default 256px is good)
-4. **Click "Create Tiles"** - image is split into overlapping tiles
-5. **Tiles saved to** `data/tiles/{tray_id}/`
-6. **Later:** Export tiles and use Roboflow/Label Studio to label them
-7. **Once labeled:** Re-train YOLO with your custom data
+Built as an engineering capstone project for OKSIR. The code is provided as is for reference and long term maintenance. It assumes a Raspberry Pi camera stack and was validated on site at the client facility.
 
-### Workflow 3: Analyze Data
+## Technology
 
-1. **Go to "Data Analysis" page**
-2. **Summary stats** show at top (total captures, avg count, etc.)
-3. **Tray breakdown** shows per-tray statistics
-4. **Charts** visualize trends over time
-5. **Outlier detection** finds unusual readings
-6. **Export to Excel** for Scott to use in reports/spreadsheets
-
-## File Descriptions
-
-### `app.py` (Main Program)
-- Streamlit web application
-- Handles UI, navigation between 3 pages
-- Integrates all modules
-- **This is what you run:** `streamlit run app.py`
-
-### `camera.py`
-- `CameraManager` class: Unified interface for Pi or USB camera
-- `get_frame()`: Returns current frame
-- `capture_image()`: Saves image to disk
-- Falls back gracefully if Picamera2 unavailable
-
-### `detector.py`
-- `ExuviaDetector` class: YOLO inference wrapper
-- `detect()`: Runs model on image, returns count + bboxes
-- Supports YOLOv8n, YOLOv8s, YOLOv8m models
-- Auto-downloads model on first use (~20-100MB depending on size)
-
-### `tiler.py`
-- `ImageTiler` class: Split images into tiles
-- `create_tiles()`: Generates overlapping tiles
-- `save_tiles()`: Stores tiles organized by tray
-- `load_tile_library()`: Browse all tiles
-
-### `data_manager.py`
-- `DataManager` class: Excel logging + statistics
-- `add_detection()`: Log a detection record
-- `get_summary_stats()`: Calculate summary metrics
-- `detect_outliers()`: Find anomalies (Z-score)
-- Auto-saves to `data/exuvia_log.xlsx`
-
-## Configuration
-
-### Change Model Size
-
-In app.py, "Data Analysis" page:
-```python
-model_choice = st.selectbox(
-    "Model",
-    options=["yolov8n.pt", "yolov8s.pt", "yolov8m.pt"],  # Change here
-)
-```
-
-- **yolov8n** (nano): ~6MB, fastest, ok accuracy
-- **yolov8s** (small): ~22MB, balanced
-- **yolov8m** (medium): ~50MB, most accurate but slower
-
-### Change Tile Size
-
-In "Training Data" page, adjust:
-- **Tile Size**: 128-512px (256 recommended)
-- **Overlap**: 0-100px (50 recommended to avoid cutting exuvia)
-
-### Change Confidence Threshold
-
-In "Live Capture" page:
-- **Lower (0.3)**: More detections, some false positives
-- **Default (0.5)**: Good balance
-- **Higher (0.8)**: Only very confident detections
-
-## Excel Data Format
-
-Your `data/exuvia_log.xlsx` will have columns:
-
-| Timestamp | Tray_ID | Zoom | Model | Count | Mean_Confidence | Image_Path | Notes |
-|-----------|---------|------|-------|-------|-----------------|------------|-------|
-| 2026-03-16 14:30:45 | tray_001 | 1x | YOLOv8N | 12 | 0.87 | data/captures/tray_001_... | Checked manually |
-| 2026-03-16 14:31:20 | tray_001 | 2x | YOLOv8N | 11 | 0.89 | data/captures/tray_001_... | - |
-
-You can pivot/analyze this in Excel or pandas:
-```python
-import pandas as pd
-df = pd.read_excel("data/exuvia_log.xlsx")
-print(df.groupby("Tray_ID")["Count"].mean())  # Average per tray
-print(df[df["Count"] > df["Count"].std() * 2])  # Outliers
-```
-
-## Troubleshooting
-
-### Camera not detected
-```
-❌ Camera not available. Check connection and restart app.
-```
-**Fix:** 
-- Check SSH connection to Pi
-- Verify camera cable is seated
-- Test: `libcamera-still --help` on Pi terminal
-
-### YOLO model won't download
-```
-ultralytics.utils.errors.HUBModelError: ...
-```
-**Fix:**
-- Model downloads on first use (~100MB)
-- Ensure internet connection
-- Check disk space: `df -h`
-
-### Streamlit not found
-```
-command not found: streamlit
-```
-**Fix:**
-```bash
-pip install -r requirements.txt
-```
-
-### Picamera2 not available
-```
-WARNING: Picamera2 not available. Fallback to OpenCV webcam.
-```
-**This is OK!** System falls back to USB webcam. Only an issue on Pi if you want to use HQ camera.
-
-## Next Steps
-
-### Phase 2: Custom Model Training
-1. Collect 100+ tray images
-2. Use tiling to create 1000+ tiles
-3. Label tiles in Roboflow (~2-3 hours)
-4. Train YOLOv8 on custom data (1-2 hours on Pi or PC)
-5. Replace model path in `detector.py`
-
-### Phase 3: Advanced Features
-- Web UI accessible from anywhere (deploy to cloud)
-- Model versioning & A/B testing
-- Automated alerts if counts are abnormal
-- Integration with Scott's reporting system
-- Import/export from Google Sheets
-
-## Technology Stack
-
-- **Streamlit**: Web framework (no frontend coding needed)
-- **OpenCV**: Image processing
-- **Ultralytics YOLOv8**: Object detection
-- **Pandas**: Data management
-- **Scipy**: Statistical analysis
-- **Picamera2**: Raspberry Pi camera interface
-
-## Questions?
-
-Refer to:
-- **Streamlit docs**: https://docs.streamlit.io
-- **YOLOv8 docs**: https://docs.ultralytics.com
-- **Picamera2 docs**: https://github.com/raspberrypi/picamera2
-- **Pandas docs**: https://pandas.pydata.org
-
----
-
-**Made for Osoyoos facility exuvia counting** 🐛
+Python, Streamlit, OpenCV, NumPy, pandas, SciPy, Matplotlib, Ultralytics YOLO, and the Raspberry Pi camera tooling.
