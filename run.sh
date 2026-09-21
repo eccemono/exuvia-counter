@@ -60,7 +60,9 @@ echo "Installing dependencies..."
 if ! "$PIP_BIN" install --disable-pip-version-check --upgrade pip; then
     echo "pip upgrade skipped; continuing with existing pip."
 fi
-"$PIP_BIN" install -r requirements.txt
+if ! "$PIP_BIN" install -r requirements.txt; then
+    echo "WARNING: requirements install failed; continuing if streamlit already installed."
+fi
 
 if [ "$WITH_ML" = "true" ]; then
     echo ""
