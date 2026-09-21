@@ -1,0 +1,4 @@
+# Optional ML dependencies (YOLO)
+# On Raspberry Pi, this is most reliable with Python 3.11/3.12.
+# Python 3.13 may not have stable torch/ultralytics wheels yet.
+ultralytics>=8.3,<9.0

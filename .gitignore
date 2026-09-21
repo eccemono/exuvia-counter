@@ -1,0 +1,27 @@
+# Virtual environment
+venv/
+.venv/
+
+# Data files (large, not for repo)
+data/
+*.xlsx
+*.csv
+
+# Model files (large, download separately)
+models/*.pt
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
