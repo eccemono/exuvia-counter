@@ -2,11 +2,15 @@
 
 Automating the counting of codling moth exuvia for British Columbia's sterile insect release program. A Raspberry Pi imaging system, a YOLO computer vision model, and a Streamlit web app that turns a slow manual task into a minute of camera work.
 
+![YOLO detection output over an exuvia tray](images/labelledexuvia.jpg)
+
 ## The problem
 
 The Okanagan Kootenay Sterile Insect Release program (OKSIR) breeds and releases millions of sterile codling moths to protect Okanagan orchards without relying on pesticides. To verify production, staff count *exuvia*, the shed exoskeletons larvae leave behind when they mature into adult moths.
 
 Counting is done by hand. Staff divide each tray into quarters, count one quarter, and multiply by four to estimate the total. It is slow, tedious, and prone to error, and it can tie up a full employee for a summer.
+
+![The old quarter counting method done by hand](images/quartercounting.jpg)
 
 This project replaces the manual method with a controlled imaging box and a computer vision model that estimates a tray count in minutes.
 
@@ -34,12 +38,18 @@ This project replaces the manual method with a controlled imaging box and a comp
 - White and UV LED array inside an aluminum and vinyl coated enclosure
 - 3D printed overhead camera mount with adjustable focus, iris, and zoom
 
+![Imaging enclosure with the 3D printed overhead camera mount](images/boxwith3dprintedmountontop.jpg)
+
+![Adjusting focus, iris, and zoom on the factory automation lens](images/adjustingcameralens.gif)
+
 ## Software
 
 - Python and Streamlit for the web interface
 - Ultralytics YOLO for detection
 - OpenCV, NumPy, pandas, SciPy, and Matplotlib for processing and statistics
 - Full resolution stills via `rpicam-jpeg` and a live preview via `rpicam-still`
+
+![The Streamlit web app](images/webapp.jpg)
 
 ## Features
 
@@ -54,24 +64,25 @@ This project replaces the manual method with a controlled imaging box and a comp
 
 ```
 exuvia-counter/
-├── app.py             # Main Streamlit application
-├── camera.py          # Camera control (Pi HQ camera and USB fallback)
-├── detector.py        # YOLO detection and tiled inference
-├── tiler.py           # Image tiling for training data
-├── data_manager.py    # Excel logging and statistics
-├── config.py          # Default settings
-├── requirements.txt   # Core dependencies
-├── requirements-ml.txt# Optional YOLO dependencies
-├── run.sh             # Setup and launch script
-├── examples.py        # Programmatic usage examples
-└── .streamlit/        # Streamlit theme configuration
+├── app.py              # Main Streamlit application
+├── camera.py           # Camera control (Pi HQ camera and USB fallback)
+├── detector.py         # YOLO detection and tiled inference
+├── tiler.py            # Image tiling for training data
+├── data_manager.py     # Excel logging and statistics
+├── config.py           # Default settings
+├── requirements.txt    # Core dependencies
+├── requirements-ml.txt # Optional YOLO dependencies
+├── run.sh              # Setup and launch script
+├── examples.py         # Programmatic usage examples
+├── images/             # Project images
+└── .streamlit/         # Streamlit theme configuration
 ```
 
 ## Getting started
 
 ### Prerequisites
 
-- Raspberry Pi 4 or 5 (or a desktop for testing)
+- Raspberry Pi 4 or 5, or a desktop for testing
 - Python 3.11 or 3.12 recommended for YOLO
 - A Raspberry Pi HQ Camera or a USB webcam
 

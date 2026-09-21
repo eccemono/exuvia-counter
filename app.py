@@ -673,8 +673,7 @@ if page == "camera-focus":
     st.caption(
         "The Pi HQ camera has a manual lens. "
         "Use the live feed below to adjust focus. "
-        "Refer to the [Guide/Manual](https://docs.google.com/document/d/1wDBeD1E9GZ5ZaHm4I_H8D6K9ydvff_BBw3AuetpO-Ec/edit?usp=sharing) "
-        "for info on adjusting the three focus rings."
+        "Adjust the three focus rings to sharpen the tray."
     )
 
     # --- top controls ---
@@ -1725,10 +1724,6 @@ elif page == "data-tables":
 
 elif page == "technical-info":
     st.title("🐛 Info")
-    st.markdown(
-        "[Guide/Manual](https://docs.google.com/document/d/1wDBeD1E9GZ5ZaHm4I_H8D6K9ydvff_BBw3AuetpO-Ec/edit?usp=sharing) "
-        "— Full documentation and operational guide."
-    )
     st.markdown("---")
     st.markdown("""
 Architecture:
